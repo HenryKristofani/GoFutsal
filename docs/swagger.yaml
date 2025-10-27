@@ -1,0 +1,154 @@
+basePath: /
+definitions:
+  models.Court:
+    properties:
+      id:
+        type: integer
+      is_available:
+        type: boolean
+      location:
+        type: string
+      name:
+        type: string
+      price_per_hour:
+        type: integer
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: henry@example.com
+    name: Developer API Support
+    url: https://github.com/HenryKristofani
+  description: API untuk sistem booking lapangan futsal.
+  termsOfService: http://swagger.io/terms/
+  title: GoFutsal API
+  version: "1.0"
+paths:
+  /courts:
+    get:
+      description: Menampilkan semua lapangan futsal
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Court'
+            type: array
+      summary: Get all courts
+      tags:
+      - Courts
+    post:
+      consumes:
+      - application/json
+      description: Menambahkan data lapangan futsal baru
+      parameters:
+      - description: Court Data
+        in: body
+        name: court
+        required: true
+        schema:
+          $ref: '#/definitions/models.Court'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Court'
+      summary: Tambah lapangan baru
+      tags:
+      - Courts
+  /courts/{id}:
+    delete:
+      description: Menghapus data lapangan futsal berdasarkan ID
+      parameters:
+      - description: Court ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Delete court
+      tags:
+      - Courts
+    get:
+      description: Menampilkan detail lapangan futsal berdasarkan ID
+      parameters:
+      - description: Court ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Court'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get court by ID
+      tags:
+      - Courts
+    put:
+      consumes:
+      - application/json
+      description: Memperbarui data lapangan futsal berdasarkan ID
+      parameters:
+      - description: Court ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Court Data
+        in: body
+        name: court
+        required: true
+        schema:
+          $ref: '#/definitions/models.Court'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Update court
+      tags:
+      - Courts
+swagger: "2.0"

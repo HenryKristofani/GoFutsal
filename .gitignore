@@ -1,0 +1,9 @@
+# Go build files
+bin/
+*.exe
+*.log
+*.out
+
+# Environment config
+.env
+.env.local
