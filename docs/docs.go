@@ -20,7 +20,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/courts": {
+        "/api/courts": {
             "get": {
                 "description": "Menampilkan semua lapangan futsal",
                 "produces": [
@@ -75,7 +75,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/courts/{id}": {
+        "/api/courts/{id}": {
             "get": {
                 "description": "Menampilkan detail lapangan futsal berdasarkan ID",
                 "produces": [

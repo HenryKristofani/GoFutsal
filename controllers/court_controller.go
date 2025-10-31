@@ -3,9 +3,9 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/HenryKristofani/GoFutsal/config"
 	"github.com/HenryKristofani/GoFutsal/models"
+	"github.com/gin-gonic/gin"
 )
 
 // GetCourts godoc
@@ -14,7 +14,7 @@ import (
 // @Tags         Courts
 // @Produce      json
 // @Success      200  {array}  models.Court
-// @Router       /courts [get]
+// @Router       /api/courts [get]
 func GetCourts(c *gin.Context) {
 	rows, err := config.DB.Query("SELECT id, name, location, price_per_hour, is_available FROM courts ORDER BY id")
 	if err != nil {
@@ -44,7 +44,7 @@ func GetCourts(c *gin.Context) {
 // @Param        id   path      int  true  "Court ID"
 // @Success      200  {object}  models.Court
 // @Failure      404  {object}  map[string]string
-// @Router       /courts/{id} [get]
+// @Router       /api/courts/{id} [get]
 func GetCourtByID(c *gin.Context) {
 	id := c.Param("id")
 	var court models.Court
@@ -68,7 +68,7 @@ func GetCourtByID(c *gin.Context) {
 // @Produce      json
 // @Param        court  body  models.Court  true  "Court Data"
 // @Success      201  {object}  models.Court
-// @Router       /courts [post]
+// @Router       /api/courts [post]
 func CreateCourt(c *gin.Context) {
 	var court models.Court
 	if err := c.ShouldBindJSON(&court); err != nil {
@@ -100,7 +100,7 @@ func CreateCourt(c *gin.Context) {
 // @Success      200    {object}  map[string]string
 // @Failure      400    {object}  map[string]string
 // @Failure      500    {object}  map[string]string
-// @Router       /courts/{id} [put]
+// @Router       /api/courts/{id} [put]
 func UpdateCourt(c *gin.Context) {
 	id := c.Param("id")
 	var court models.Court
@@ -131,7 +131,7 @@ func UpdateCourt(c *gin.Context) {
 // @Param        id   path      int  true  "Court ID"
 // @Success      200  {object}  map[string]string
 // @Failure      500  {object}  map[string]string
-// @Router       /courts/{id} [delete]
+// @Router       /api/courts/{id} [delete]
 func DeleteCourt(c *gin.Context) {
 	id := c.Param("id")
 	_, err := config.DB.Exec("DELETE FROM courts WHERE id = $1", id)

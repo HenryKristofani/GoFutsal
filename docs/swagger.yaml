@@ -24,7 +24,7 @@ info:
   title: GoFutsal API
   version: "1.0"
 paths:
-  /courts:
+  /api/courts:
     get:
       description: Menampilkan semua lapangan futsal
       produces:
@@ -60,7 +60,7 @@ paths:
       summary: Tambah lapangan baru
       tags:
       - Courts
-  /courts/{id}:
+  /api/courts/{id}:
     delete:
       description: Menghapus data lapangan futsal berdasarkan ID
       parameters:

@@ -24,10 +24,17 @@ func SetupRoutes(r *gin.Engine) {
 	})
 
 	// COURT routes
-	r.GET("/courts", controllers.GetCourts)
-	r.GET("/courts/:id", controllers.GetCourtByID)
-	r.POST("/courts", controllers.CreateCourt)
-	r.PUT("/courts/:id", controllers.UpdateCourt)
-	r.DELETE("/courts/:id", controllers.DeleteCourt)
+	r.GET("/api/courts", controllers.GetCourts)
+	r.GET("/api/courts/:id", controllers.GetCourtByID)
+	r.POST("/api/courts", controllers.CreateCourt)
+	r.PUT("/api/courts/:id", controllers.UpdateCourt)
+	r.DELETE("/api/courts/:id", controllers.DeleteCourt)
+
+	// BOOKING routes
+	r.GET("/api/bookings", controllers.GetBookings)
+	r.POST("/api/bookings", controllers.CreateBooking)
+	r.GET("/api/bookings/:id", controllers.GetBookingByID)
+	r.PUT("/api/bookings/:id", controllers.UpdateBooking)
+	r.DELETE("/api/bookings/:id", controllers.DeleteBooking)
 
 }

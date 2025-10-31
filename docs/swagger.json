@@ -14,7 +14,7 @@
     "host": "localhost:8080",
     "basePath": "/",
     "paths": {
-        "/courts": {
+        "/api/courts": {
             "get": {
                 "description": "Menampilkan semua lapangan futsal",
                 "produces": [
@@ -69,7 +69,7 @@
                 }
             }
         },
-        "/courts/{id}": {
+        "/api/courts/{id}": {
             "get": {
                 "description": "Menampilkan detail lapangan futsal berdasarkan ID",
                 "produces": [
