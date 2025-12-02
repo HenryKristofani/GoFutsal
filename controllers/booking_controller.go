@@ -4,12 +4,19 @@ import (
 	"net/http"
 	// "strconv"
 
-	"github.com/gin-gonic/gin"
 	"github.com/HenryKristofani/GoFutsal/config"
 	"github.com/HenryKristofani/GoFutsal/models"
+	"github.com/gin-gonic/gin"
 )
 
 // GET /bookings
+// GetBookings godoc
+// @Summary      Get all bookings
+// @Description  Menampilkan semua data booking
+// @Tags         Bookings
+// @Produce      json
+// @Success      200  {array}  models.Booking
+// @Router       /api/bookings [get]
 func GetBookings(c *gin.Context) {
 	rows, err := config.DB.Query(`
 		SELECT id, court_id, customer_name, booking_date, start_time, end_time, total_price 
@@ -35,6 +42,15 @@ func GetBookings(c *gin.Context) {
 }
 
 // GET /bookings/:id
+// GetBookingByID godoc
+// @Summary      Get booking by ID
+// @Description  Menampilkan detail booking berdasarkan ID
+// @Tags         Bookings
+// @Produce      json
+// @Param        id   path      int  true  "Booking ID"
+// @Success      200  {object}  models.Booking
+// @Failure      404  {object}  map[string]string
+// @Router       /api/bookings/{id} [get]
 func GetBookingByID(c *gin.Context) {
 	id := c.Param("id")
 	var b models.Booking
@@ -56,6 +72,17 @@ func GetBookingByID(c *gin.Context) {
 }
 
 // POST /bookings
+// CreateBooking godoc
+// @Summary      Create new booking
+// @Description  Membuat data booking baru
+// @Tags         Bookings
+// @Accept       json
+// @Produce      json
+// @Param        booking  body  models.Booking  true  "Booking Data"
+// @Success      201  {object}  models.Booking
+// @Failure      400  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /api/bookings [post]
 func CreateBooking(c *gin.Context) {
 	var newBooking models.Booking
 	if err := c.ShouldBindJSON(&newBooking); err != nil {
@@ -86,6 +113,19 @@ func CreateBooking(c *gin.Context) {
 }
 
 // PUT /bookings/:id
+// UpdateBooking godoc
+// @Summary      Update booking
+// @Description  Memperbarui data booking berdasarkan ID
+// @Tags         Bookings
+// @Accept       json
+// @Produce      json
+// @Param        id      path      int          true  "Booking ID"
+// @Param        booking body      models.Booking true  "Booking Data"
+// @Success      200     {object}  map[string]string
+// @Failure      400     {object}  map[string]string
+// @Failure      404     {object}  map[string]string
+// @Failure      500     {object}  map[string]string
+// @Router       /api/bookings/{id} [put]
 func UpdateBooking(c *gin.Context) {
 	id := c.Param("id")
 	var updated models.Booking
@@ -125,6 +165,16 @@ func UpdateBooking(c *gin.Context) {
 }
 
 // DELETE /bookings/:id
+// DeleteBooking godoc
+// @Summary      Delete booking
+// @Description  Menghapus data booking berdasarkan ID
+// @Tags         Bookings
+// @Produce      json
+// @Param        id   path      int  true  "Booking ID"
+// @Success      200  {object}  map[string]string
+// @Failure      404  {object}  map[string]string
+// @Failure      500  {object}  map[string]string
+// @Router       /api/bookings/{id} [delete]
 func DeleteBooking(c *gin.Context) {
 	id := c.Param("id")
 
