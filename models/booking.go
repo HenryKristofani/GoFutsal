@@ -3,6 +3,7 @@ package models
 type Booking struct {
 	ID           int    `json:"id" db:"id"`
 	CourtID      int    `json:"court_id" db:"court_id"`
+	UserID       int    `json:"user_id" db:"user_id"`
 	CustomerName string `json:"customer_name" db:"customer_name"`
 	BookingDate  string `json:"booking_date" db:"booking_date"`
 	StartTime    string `json:"start_time" db:"start_time"`

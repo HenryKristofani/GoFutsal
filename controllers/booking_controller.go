@@ -19,7 +19,7 @@ import (
 // @Router       /api/bookings [get]
 func GetBookings(c *gin.Context) {
 	rows, err := config.DB.Query(`
-		SELECT id, court_id, customer_name, booking_date, start_time, end_time, total_price 
+		SELECT id, court_id, user_id, customer_name, booking_date, start_time, end_time, total_price 
 		FROM bookings ORDER BY booking_date DESC
 	`)
 	if err != nil {
@@ -31,7 +31,7 @@ func GetBookings(c *gin.Context) {
 	var bookings []models.Booking
 	for rows.Next() {
 		var b models.Booking
-		if err := rows.Scan(&b.ID, &b.CourtID, &b.CustomerName, &b.BookingDate, &b.StartTime, &b.EndTime, &b.TotalPrice); err != nil {
+		if err := rows.Scan(&b.ID, &b.CourtID, &b.UserID, &b.CustomerName, &b.BookingDate, &b.StartTime, &b.EndTime, &b.TotalPrice); err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
@@ -56,11 +56,11 @@ func GetBookingByID(c *gin.Context) {
 	var b models.Booking
 
 	query := `
-		SELECT id, court_id, customer_name, booking_date, start_time, end_time, total_price
+		SELECT id, court_id, user_id, customer_name, booking_date, start_time, end_time, total_price
 		FROM bookings WHERE id = $1
 	`
 	err := config.DB.QueryRow(query, id).Scan(
-		&b.ID, &b.CourtID, &b.CustomerName, &b.BookingDate, &b.StartTime, &b.EndTime, &b.TotalPrice,
+		&b.ID, &b.CourtID, &b.UserID, &b.CustomerName, &b.BookingDate, &b.StartTime, &b.EndTime, &b.TotalPrice,
 	)
 
 	if err != nil {
@@ -91,12 +91,13 @@ func CreateBooking(c *gin.Context) {
 	}
 
 	query := `
-		INSERT INTO bookings (court_id, customer_name, booking_date, start_time, end_time, total_price)
-		VALUES ($1, $2, $3, $4, $5, $6)
+		INSERT INTO bookings (court_id, user_id, customer_name, booking_date, start_time, end_time, total_price)
+		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		RETURNING id
 	`
 	err := config.DB.QueryRow(query,
 		newBooking.CourtID,
+		newBooking.UserID,
 		newBooking.CustomerName,
 		newBooking.BookingDate,
 		newBooking.StartTime,
@@ -137,11 +138,12 @@ func UpdateBooking(c *gin.Context) {
 
 	query := `
 		UPDATE bookings 
-		SET court_id=$1, customer_name=$2, booking_date=$3, start_time=$4, end_time=$5, total_price=$6
-		WHERE id=$7
+		SET court_id=$1, user_id=$2, customer_name=$3, booking_date=$4, start_time=$5, end_time=$6, total_price=$7
+		WHERE id=$8
 	`
 	res, err := config.DB.Exec(query,
 		updated.CourtID,
+		updated.UserID,
 		updated.CustomerName,
 		updated.BookingDate,
 		updated.StartTime,

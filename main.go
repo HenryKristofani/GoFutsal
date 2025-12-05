@@ -34,6 +34,9 @@ func main() {
 	// Connect ke database
 	config.ConnectDB()
 
+	// Run database migrations
+	config.CheckAndRunMigrations()
+
 	// Inisialisasi Gin
 	r := gin.Default()
 
