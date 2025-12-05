@@ -3,12 +3,17 @@ package routes
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/HenryKristofani/GoFutsal/config"
 	"github.com/HenryKristofani/GoFutsal/controllers"
+	"github.com/gin-gonic/gin"
 )
 
 func SetupRoutes(r *gin.Engine) {
+	// USER CRUD
+	r.GET("/api/users", controllers.GetUsers)
+	r.GET("/api/users/:id", controllers.GetUserByID)
+	r.PUT("/api/users/:id", controllers.UpdateUser)
+	r.DELETE("/api/users/:id", controllers.DeleteUser)
 	// Route test API
 	r.GET("/api", controllers.TestEndpoint)
 
@@ -29,6 +34,9 @@ func SetupRoutes(r *gin.Engine) {
 	r.POST("/api/courts", controllers.CreateCourt)
 	r.PUT("/api/courts/:id", controllers.UpdateCourt)
 	r.DELETE("/api/courts/:id", controllers.DeleteCourt)
+
+	// USER register (client only)
+	r.POST("/api/users/register", controllers.RegisterUser)
 
 	// BOOKING routes
 	r.GET("/api/bookings", controllers.GetBookings)
