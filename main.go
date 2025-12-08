@@ -12,8 +12,8 @@ import (
 
 	// 👇 Swagger dependencies
 	_ "github.com/HenryKristofani/GoFutsal/docs"
-	ginSwagger "github.com/swaggo/gin-swagger"
 	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // @title GoFutsal API

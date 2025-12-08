@@ -16,7 +16,7 @@ func RunMigrations() error {
 
 	for _, filename := range migrationFiles {
 		filePath := filepath.Join("config", filename)
-		
+
 		// Read SQL file
 		sqlBytes, err := ioutil.ReadFile(filePath)
 		if err != nil {
@@ -37,7 +37,7 @@ func RunMigrations() error {
 			// Don't return error, continue with other migrations
 			continue
 		}
-		
+
 		log.Printf("Successfully applied migration: %s", filename)
 	}
 
@@ -47,10 +47,10 @@ func RunMigrations() error {
 // CheckAndRunMigrations runs migrations and handles errors gracefully
 func CheckAndRunMigrations() {
 	fmt.Println("🔄 Running database migrations...")
-	
+
 	if err := RunMigrations(); err != nil {
 		log.Printf("Migration error: %v", err)
 	}
-	
+
 	fmt.Println("✅ Database migrations completed")
 }

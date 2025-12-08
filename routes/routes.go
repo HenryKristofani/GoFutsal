@@ -14,6 +14,10 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("/api/users/:id", controllers.GetUserByID)
 	r.PUT("/api/users/:id", controllers.UpdateUser)
 	r.DELETE("/api/users/:id", controllers.DeleteUser)
+	
+	// AUTHENTICATION
+	r.POST("/api/login", controllers.Login)
+	
 	// Route test API
 	r.GET("/api", controllers.TestEndpoint)
 

@@ -1,5 +1,25 @@
 basePath: /
 definitions:
+  controllers.LoginRequest:
+    properties:
+      password:
+        example: password123
+        type: string
+      username:
+        example: johndoe
+        type: string
+    required:
+    - password
+    - username
+    type: object
+  controllers.LoginResponse:
+    properties:
+      message:
+        example: Login successful
+        type: string
+      user:
+        $ref: '#/definitions/models.User'
+    type: object
   models.Booking:
     properties:
       booking_date:
@@ -15,6 +35,8 @@ definitions:
       start_time:
         type: string
       total_price:
+        type: integer
+      user_id:
         type: integer
     type: object
   models.Court:
@@ -334,6 +356,46 @@ paths:
       summary: Update court
       tags:
       - Courts
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Login dengan username dan password
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user
+      tags:
+      - Authentication
   /api/users:
     get:
       description: Menampilkan semua user
