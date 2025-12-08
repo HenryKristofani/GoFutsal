@@ -57,7 +57,7 @@ func Login(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Terjadi kesalahan pada server"})
 		return
-	}
+	} 
 
 	// Verifikasi password dengan bcrypt
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginReq.Password))

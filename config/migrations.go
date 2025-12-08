@@ -12,6 +12,7 @@ func RunMigrations() error {
 	migrationFiles := []string{
 		"users.sql",
 		"add_user_id_to_bookings.sql",
+		"ensure_username_unique.sql",
 	}
 
 	for _, filename := range migrationFiles {
