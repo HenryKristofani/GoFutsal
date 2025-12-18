@@ -1,23 +1,37 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { LogIn, UserPlus, Menu } from "lucide-react"
+import { LogIn, UserPlus, Menu, LogOut, User } from "lucide-react"
 import { useState, useEffect } from "react"
 import { AuthDialog } from "./auth-dialog"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu"
+import { AuthAPI, type User as UserType } from "@/lib/auth"
 
 export function Header() {
   const [showAuthDialog, setShowAuthDialog] = useState(false)
   const [authMode, setAuthMode] = useState<"login" | "register">("login")
   const [mounted, setMounted] = useState(false)
+  const [user, setUser] = useState<UserType | null>(null)
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
 
   useEffect(() => {
     setMounted(true)
+    // Check authentication status
+    const authUser = AuthAPI.getCurrentUser()
+    const authenticated = AuthAPI.isAuthenticated()
+    setUser(authUser)
+    setIsAuthenticated(authenticated)
   }, [])
 
   const handleAuthClick = (mode: "login" | "register") => {
     setAuthMode(mode)
     setShowAuthDialog(true)
+  }
+
+  const handleLogout = () => {
+    AuthAPI.logout()
+    setUser(null)
+    setIsAuthenticated(false)
   }
 
   return (
@@ -57,16 +71,37 @@ export function Header() {
 
             <div className="flex items-center gap-1 sm:gap-2">
               <div className="hidden md:flex items-center gap-1 lg:gap-2">
-                <Button variant="ghost" size="sm" onClick={() => handleAuthClick("login")} className="text-xs sm:text-sm">
-                  <LogIn className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Masuk</span>
-                  <span className="sm:hidden">Login</span>
-                </Button>
-                <Button size="sm" onClick={() => handleAuthClick("register")} className="text-xs sm:text-sm">
-                  <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
-                  <span className="hidden sm:inline">Daftar</span>
-                  <span className="sm:hidden">Sign</span>
-                </Button>
+                {isAuthenticated && user ? (
+                  <>
+                    <div className="flex items-center gap-2 px-2 py-1 rounded-md bg-muted/50">
+                      <User className="w-3 h-3 sm:w-4 sm:h-4" />
+                      <span className="text-xs sm:text-sm font-medium">
+                        {user.username}
+                      </span>
+                      <span className="text-xs text-muted-foreground bg-primary/10 px-1.5 py-0.5 rounded">
+                        {user.role}
+                      </span>
+                    </div>
+                    <Button variant="ghost" size="sm" onClick={handleLogout} className="text-xs sm:text-sm">
+                      <LogOut className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Keluar</span>
+                      <span className="sm:hidden">Out</span>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => handleAuthClick("login")} className="text-xs sm:text-sm">
+                      <LogIn className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Masuk</span>
+                      <span className="sm:hidden">Login</span>
+                    </Button>
+                    <Button size="sm" onClick={() => handleAuthClick("register")} className="text-xs sm:text-sm">
+                      <UserPlus className="w-3 h-3 sm:w-4 sm:h-4 mr-1 sm:mr-2" />
+                      <span className="hidden sm:inline">Daftar</span>
+                      <span className="sm:hidden">Sign</span>
+                    </Button>
+                  </>
+                )}
               </div>
 
               {mounted && (
@@ -92,14 +127,32 @@ export function Header() {
                         Tentang
                       </a>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAuthClick("login")}>
-                      <LogIn className="w-4 h-4 mr-2" />
-                      Masuk
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleAuthClick("register")}>
-                      <UserPlus className="w-4 h-4 mr-2" />
-                      Daftar
-                    </DropdownMenuItem>
+                    
+                    <DropdownMenuSeparator className="lg:hidden" />
+                    
+                    {isAuthenticated && user ? (
+                      <>
+                        <DropdownMenuItem disabled>
+                          <User className="w-4 h-4 mr-2" />
+                          {user.username} ({user.role})
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={handleLogout}>
+                          <LogOut className="w-4 h-4 mr-2" />
+                          Keluar
+                        </DropdownMenuItem>
+                      </>
+                    ) : (
+                      <>
+                        <DropdownMenuItem onClick={() => handleAuthClick("login")}>
+                          <LogIn className="w-4 h-4 mr-2" />
+                          Masuk
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => handleAuthClick("register")}>
+                          <UserPlus className="w-4 h-4 mr-2" />
+                          Daftar
+                        </DropdownMenuItem>
+                      </>
+                    )}
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
