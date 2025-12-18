@@ -14,9 +14,18 @@ definitions:
     type: object
   controllers.LoginResponse:
     properties:
+      access_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
       message:
         example: Login successful
         type: string
+      refresh_token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+      success:
+        example: true
+        type: boolean
       user:
         $ref: '#/definitions/models.User'
     type: object
@@ -73,11 +82,76 @@ info:
     email: henry@example.com
     name: Developer API Support
     url: https://github.com/HenryKristofani
-  description: API untuk sistem booking lapangan futsal.
+  description: API untuk sistem booking lapangan futsal dengan JWT Authentication.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
   title: GoFutsal API
   version: "1.0"
 paths:
+  /api/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Login dengan username dan password
+      parameters:
+      - description: Login Credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Login user
+      tags:
+      - Authentication
+  /api/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Generate new access token using refresh token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/controllers.LoginResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Refresh access token
+      tags:
+      - Authentication
   /api/bookings:
     get:
       description: Menampilkan semua data booking
@@ -356,46 +430,33 @@ paths:
       summary: Update court
       tags:
       - Courts
-  /api/login:
-    post:
+  /api/profile:
+    get:
       consumes:
       - application/json
-      description: Login dengan username dan password
-      parameters:
-      - description: Login Credentials
-        in: body
-        name: credentials
-        required: true
-        schema:
-          $ref: '#/definitions/controllers.LoginRequest'
+      description: Get authenticated user profile information
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controllers.LoginResponse'
-        "400":
-          description: Bad Request
-          schema:
-            additionalProperties:
-              type: string
-            type: object
+            $ref: '#/definitions/models.User'
         "401":
           description: Unauthorized
           schema:
-            additionalProperties:
-              type: string
+            additionalProperties: true
             type: object
-        "500":
-          description: Internal Server Error
+        "404":
+          description: Not Found
           schema:
-            additionalProperties:
-              type: string
+            additionalProperties: true
             type: object
-      summary: Login user
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
       tags:
-      - Authentication
+      - Users
   /api/users:
     get:
       description: Menampilkan semua user
@@ -548,4 +609,10 @@ paths:
       summary: Register akun client
       tags:
       - Users
+securityDefinitions:
+  BearerAuth:
+    description: Type "Bearer" followed by a space and JWT token.
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

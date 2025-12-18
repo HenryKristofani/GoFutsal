@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"net/http"
 
+	"github.com/HenryKristofani/GoFutsal/auth"
 	"github.com/HenryKristofani/GoFutsal/config"
 	"github.com/HenryKristofani/GoFutsal/models"
 	"github.com/gin-gonic/gin"
@@ -18,8 +19,11 @@ type LoginRequest struct {
 
 // LoginResponse represents the login response
 type LoginResponse struct {
-	Message string      `json:"message" example:"Login successful"`
-	User    models.User `json:"user"`
+	Success      bool        `json:"success" example:"true"`
+	Message      string      `json:"message" example:"Login successful"`
+	AccessToken  string      `json:"access_token,omitempty" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	RefreshToken string      `json:"refresh_token,omitempty" example:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."`
+	User         models.User `json:"user"`
 }
 
 // Login godoc
@@ -33,7 +37,7 @@ type LoginResponse struct {
 // @Failure      400  {object}  map[string]string
 // @Failure      401  {object}  map[string]string
 // @Failure      500  {object}  map[string]string
-// @Router       /api/login [post]
+// @Router       /api/auth/login [post]
 func Login(c *gin.Context) {
 	var loginReq LoginRequest
 	if err := c.ShouldBindJSON(&loginReq); err != nil {
@@ -44,7 +48,7 @@ func Login(c *gin.Context) {
 	// Query user dari database berdasarkan username
 	var user models.User
 	var hashedPassword string
-	
+
 	query := `SELECT id, username, email, password, role FROM users WHERE username = $1`
 	err := config.DB.QueryRow(query, loginReq.Username).Scan(
 		&user.ID, &user.Username, &user.Email, &hashedPassword, &user.Role,
@@ -57,7 +61,7 @@ func Login(c *gin.Context) {
 		}
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Terjadi kesalahan pada server"})
 		return
-	} 
+	}
 
 	// Verifikasi password dengan bcrypt
 	err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(loginReq.Password))
@@ -66,12 +70,34 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	// Generate JWT tokens
+	accessToken, err := auth.GenerateJWT(user.ID, user.Username, user.Email, user.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to generate access token",
+		})
+		return
+	}
+
+	refreshToken, err := auth.GenerateRefreshToken(user.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"error":   "Failed to generate refresh token",
+		})
+		return
+	}
+
 	// Login berhasil - tidak mengembalikan password
 	user.Password = "" // Kosongkan password untuk keamanan
 
 	c.JSON(http.StatusOK, LoginResponse{
-		Message: "Login berhasil",
-		User:    user,
+		Success:      true,
+		Message:      "Login berhasil",
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
+		User:         user,
 	})
 }
 
@@ -100,6 +126,126 @@ func GetUsers(c *gin.Context) {
 		users = append(users, u)
 	}
 	c.JSON(http.StatusOK, users)
+}
+
+// RefreshToken godoc
+// @Summary      Refresh access token
+// @Description  Generate new access token using refresh token
+// @Tags         Authentication
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  LoginResponse
+// @Failure      401  {object}  map[string]interface{}
+// @Router       /api/auth/refresh [post]
+func RefreshToken(c *gin.Context) {
+	authHeader := c.GetHeader("Authorization")
+	if authHeader == "" {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Refresh token required",
+		})
+		return
+	}
+
+	// Remove "Bearer " prefix if exists
+	refreshToken := authHeader
+	if len(authHeader) > 7 && authHeader[:7] == "Bearer " {
+		refreshToken = authHeader[7:]
+	}
+
+	claims, err := auth.ValidateToken(refreshToken)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "Invalid refresh token: " + err.Error(),
+		})
+		return
+	}
+
+	// Get user data from database
+	var user models.User
+	var hashedPassword string
+	query := `SELECT id, username, email, password, role FROM users WHERE id = $1`
+	err = config.DB.QueryRow(query, claims.UserID).Scan(
+		&user.ID, &user.Username, &user.Email, &hashedPassword, &user.Role,
+	)
+
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "User not found",
+		})
+		return
+	}
+
+	// Generate new access token
+	newAccessToken, err := auth.GenerateJWT(user.ID, user.Username, user.Email, user.Role)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Failed to generate new token",
+		})
+		return
+	}
+
+	user.Password = "" // Don't return password
+
+	c.JSON(http.StatusOK, LoginResponse{
+		Success:     true,
+		Message:     "Token refreshed successfully",
+		AccessToken: newAccessToken,
+		User:        user,
+	})
+}
+
+// GetProfile godoc
+// @Summary      Get current user profile
+// @Description  Get authenticated user profile information
+// @Tags         Users
+// @Accept       json
+// @Produce      json
+// @Security     BearerAuth
+// @Success      200  {object}  models.User
+// @Failure      401  {object}  map[string]interface{}
+// @Failure      404  {object}  map[string]interface{}
+// @Router       /api/profile [get]
+func GetProfile(c *gin.Context) {
+	userID, exists := c.Get("user_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"success": false,
+			"message": "User not authenticated",
+		})
+		return
+	}
+
+	var user models.User
+	query := `SELECT id, username, email, role FROM users WHERE id = $1`
+	err := config.DB.QueryRow(query, userID).Scan(
+		&user.ID, &user.Username, &user.Email, &user.Role,
+	)
+
+	if err != nil {
+		if err == sql.ErrNoRows {
+			c.JSON(http.StatusNotFound, gin.H{
+				"success": false,
+				"message": "User not found",
+			})
+			return
+		}
+		c.JSON(http.StatusInternalServerError, gin.H{
+			"success": false,
+			"message": "Database error",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "Profile retrieved successfully",
+		"data":    user,
+	})
 }
 
 // GetUserByID godoc
