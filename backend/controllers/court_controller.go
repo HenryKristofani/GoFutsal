@@ -62,13 +62,16 @@ func GetCourtByID(c *gin.Context) {
 
 // CreateCourt godoc
 // @Summary      Tambah lapangan baru
-// @Description  Menambahkan data lapangan futsal baru
+// @Description  Menambahkan data lapangan futsal baru (Admin only)
 // @Tags         Courts
 // @Accept       json
 // @Produce      json
+// @Security     BearerAuth
 // @Param        court  body  models.Court  true  "Court Data"
 // @Success      201  {object}  models.Court
-// @Router       /api/courts [post]
+// @Failure      401  {object}  map[string]interface{}
+// @Failure      403  {object}  map[string]interface{}
+// @Router       /api/admin/courts [post]
 func CreateCourt(c *gin.Context) {
 	var court models.Court
 	if err := c.ShouldBindJSON(&court); err != nil {
@@ -91,16 +94,19 @@ func CreateCourt(c *gin.Context) {
 
 // UpdateCourt godoc
 // @Summary      Update court
-// @Description  Memperbarui data lapangan futsal berdasarkan ID
+// @Description  Memperbarui data lapangan futsal berdasarkan ID (Admin only)
 // @Tags         Courts
 // @Accept       json
 // @Produce      json
+// @Security     BearerAuth
 // @Param        id     path      int          true  "Court ID"
 // @Param        court  body      models.Court true  "Court Data"
 // @Success      200    {object}  map[string]string
 // @Failure      400    {object}  map[string]string
+// @Failure      401    {object}  map[string]interface{}
+// @Failure      403    {object}  map[string]interface{}
 // @Failure      500    {object}  map[string]string
-// @Router       /api/courts/{id} [put]
+// @Router       /api/admin/courts/{id} [put]
 func UpdateCourt(c *gin.Context) {
 	id := c.Param("id")
 	var court models.Court
@@ -125,13 +131,16 @@ func UpdateCourt(c *gin.Context) {
 
 // DeleteCourt godoc
 // @Summary      Delete court
-// @Description  Menghapus data lapangan futsal berdasarkan ID
+// @Description  Menghapus data lapangan futsal berdasarkan ID (Admin only)
 // @Tags         Courts
 // @Produce      json
+// @Security     BearerAuth
 // @Param        id   path      int  true  "Court ID"
 // @Success      200  {object}  map[string]string
+// @Failure      401  {object}  map[string]interface{}
+// @Failure      403  {object}  map[string]interface{}
 // @Failure      500  {object}  map[string]string
-// @Router       /api/courts/{id} [delete]
+// @Router       /api/admin/courts/{id} [delete]
 func DeleteCourt(c *gin.Context) {
 	id := c.Param("id")
 	_, err := config.DB.Exec("DELETE FROM courts WHERE id = $1", id)
