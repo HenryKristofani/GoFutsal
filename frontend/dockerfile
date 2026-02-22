@@ -1,0 +1,20 @@
+FROM node:20-alpine
+
+# Enable pnpm properly
+RUN corepack enable
+RUN corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# penting untuk fix error CI
+ENV CI=true
+
+COPY . .
+
+RUN pnpm install --frozen-lockfile
+
+RUN pnpm build
+
+EXPOSE 3000
+
+CMD ["pnpm", "start"]
